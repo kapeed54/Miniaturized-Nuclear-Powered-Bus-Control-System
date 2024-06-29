@@ -1,0 +1,9 @@
+project Nuclearpowered_Buscontrolsystem is
+
+   for Main use ("main.adb") & project'Main;
+   package Compiler is
+      for Default_Switches ("ada") use ("-gnatwa");
+   end Compiler;
+
+end Nuclearpowered_Buscontrolsystem;
+
