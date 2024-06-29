@@ -1,20 +1,20 @@
 pragma SPARK_Mode;
 
-with AS_IO_Wrapper;  use AS_IO_Wrapper; 
+with DA_IO_Wrapper;  use DA_IO_Wrapper; 
 
 package body bus_control_system is
 
    procedure reactorActive is
    begin
       bus.bussystem.status := Activated;
-      AS_Put_Line("Status of Reactor:" & bus.bussystem.status'Image);
+      DA_Put_Line("Status of Reactor:" & bus.bussystem.status'Image);
    end reactorActive;
    
    procedure reactorDeactivate is
    begin
       if (bus.bussystem.status = Activated and then bus.speed = 0) then
          bus.bussystem.status := Deactivated;
-        AS_Put_Line("Status of Reactor:" & bus.bussystem.status'Image);
+        DA_Put_Line("Status of Reactor:" & bus.bussystem.status'Image);
       end if;
    end reactorDeactivate;
    
@@ -22,7 +22,7 @@ package body bus_control_system is
    begin
       if (bus.bussystem.crods < R_CRods'Last) then
          bus.bussystem.crods:= bus.bussystem.crods + 1;
-         AS_Put_Line("Control Rod has been added to the reactor . Available Control Rods :"& bus.bussystem.crods'Image);
+         DA_Put_Line("Control Rod has been added to the reactor . Available Control Rods :"& bus.bussystem.crods'Image);
       end if;
    end insertCrods;
    
@@ -30,7 +30,7 @@ package body bus_control_system is
    begin
       if (bus.bussystem.crods > R_CRods'First) then
          bus.bussystem.crods:= bus.bussystem.crods - 1;
-         AS_Put_Line("Control Rod has been removed from the reactor. Available Control Rods :"& bus.bussystem.crods'Image);
+         DA_Put_Line("Control Rod has been removed from the reactor. Available Control Rods :"& bus.bussystem.crods'Image);
       end if;
    end removeCrods;
    
@@ -81,7 +81,7 @@ package body bus_control_system is
           and then bus.bussystem.status = Activated) then
          bus.speed := bus.speed + 1;
       else
-         AS_Put_Line("Bus has reached its maximum speed limit");
+         DA_Put_Line("Bus has reached its maximum speed limit");
       end if;
    end increaseBusspeed;
 
@@ -90,7 +90,7 @@ package body bus_control_system is
       begin
       if (bus.bussystem.temperature >= maximumtemperature) then
          bus.bussystem.heat := high;
-         AS_Put_Line("Reactor system is overheating, supply water. Heat Status: "&bus.bussystem.heat'Image);
+         DA_Put_Line("Reactor system is overheating, supply water. Heat Status: "&bus.bussystem.heat'Image);
       end if;
    end isOverheated;
    
@@ -100,13 +100,13 @@ package body bus_control_system is
           bus.bussystem.temperature >= maximumtemperature) then
          bus.bussystem.water := bus.bussystem.water - 5;
          bus.bussystem.temperature := bus.bussystem.temperature - 50;
-        AS_Put_Line("Supplying water to the reactor.");
-         AS_Put_Line("Remaining Water Amount: "&bus.bussystem.water'Image);
+        DA_Put_Line("Supplying water to the reactor.");
+         DA_Put_Line("Remaining Water Amount: "&bus.bussystem.water'Image);
       elsif (bus.bussystem.water = 0 and then bus.bussystem.temperature >= maximumtemperature) then
          stopBus;
-         AS_Put_Line(" WARNING !!! ");
-         AS_Put_Line("There is no water supply available. System is overheating.");
-         AS_Put_Line("Stopping the bus");
+         DA_Put_Line(" WARNING !!! ");
+         DA_Put_Line("There is no water supply available. System is overheating.");
+         DA_Put_Line("Stopping the bus");
       end if;
 
    end supplyWater;
@@ -117,7 +117,7 @@ package body bus_control_system is
       bus.speedlimit :=0;
       bus.power := 0;
       bus.bussystem.temperature:= R_Temp'First;
-      AS_Put_Line("Bus Stopped");
+      DA_Put_Line("Bus Stopped");
    end stopBus;
    
 
@@ -125,16 +125,16 @@ package body bus_control_system is
       begin
       if (bus.speed = 0) then
          bus.bussystem.water := R_Water'Last;
-         AS_Put_Line("Water System is Refilled: "&bus.bussystem.water'Image);
+         DA_Put_Line("Water System is Refilled: "&bus.bussystem.water'Image);
       end if;
    end waterRefill;
    
    procedure radioWaste is
    begin
       if (bus.bussystem.radioactivity = R_Activity'Last and then bus.speed>=0) then
-         AS_Put_Line("Radio Active waste reached maximum amount");
-         AS_Put_Line("Bus is STOPPING");
-         AS_Put_Line("Remove waste to continue journey");
+         DA_Put_Line("Radio Active waste reached maximum amount");
+         DA_Put_Line("Bus is STOPPING");
+         DA_Put_Line("Remove waste to continue journey");
          stopBus;
       end if;
    end radioWaste;
@@ -143,7 +143,7 @@ package body bus_control_system is
    begin
       if (bus.speed = 0) then
          bus.bussystem.radioactivity := R_Activity'First;
-         AS_Put_Line("Radio Active waste has been removed :" & bus.bussystem.radioactivity'Image);
+         DA_Put_Line("Radio Active waste has been removed :" & bus.bussystem.radioactivity'Image);
       end if;
    end removeradiowaste;
    

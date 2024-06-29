@@ -10,26 +10,26 @@ pragma SPARK_Mode (On);
 
 
 -- For using it one should first initialise stnadard input and/or standard output
--- by executing AS_Init_Standard_Input  and/or AS_Init_Standard_Output
--- functions named AS_Put* write output on the console
--- functions named AS_Get* get input from the console
+-- by executing DA_Init_Standard_Input  and/or DA_Init_Standard_Output
+-- functions named DA_Put* write output on the console
+-- functions named DA_Get* get input from the console
 
 with SPARK.Text_IO;
 use SPARK.Text_IO;
 
 
-package AS_Io_Wrapper 
+package DA_Io_Wrapper 
 is
    
    -- this procedure initialises standard input
-   procedure AS_Init_Standard_Input 
+   procedure DA_Init_Standard_Input 
      with Global => (Output => Standard_Input),
      Depends => (Standard_Input  => null);
    --          Post => Is_Readable (Standard_Input);
    --          Status (Standard_Input) = Success;
    
    -- this procedure initialises standard output
-   procedure AS_Init_Standard_Output 
+   procedure DA_Init_Standard_Output 
      with 
        Global => (Output => Standard_Output),
        Depends => (Standard_Output  => null);     
@@ -37,13 +37,13 @@ is
    --    and Status (Standard_Output) = Success;
    
    --  -- as_get gets a character from console IO
-   --  procedure AS_Get (Item : out Character_Result)
+   --  procedure DA_Get (Item : out Character_Result)
    --    with Global => (In_Out => (Standard_Input)),
    --    Depends=> (Standard_Input => Standard_Input,
    --  		Item => Standard_Input);
    
    -- as_put writes a character onto console IO   
-   procedure AS_Put (Item : in  Character)
+   procedure DA_Put (Item : in  Character)
      with 
        Global => (In_Out => Standard_Output),
        Depends=> (Standard_Output => (Item, Standard_Output));
@@ -52,16 +52,16 @@ is
    -- the string it expects is the length of the string Item
    -- so if called with an Itm : string (1 .. 100)
    -- this procedure will wait until 100 characters are typed in.
-   procedure AS_Get (Item : out String)
+   procedure DA_Get (Item : out String)
      with 
        Global => (In_Out => (Standard_Input)),
        Depends=> (Standard_Input => Standard_Input,
                   Item => Standard_Input);
    
-   procedure AS_Clear_Buffer;   
+   procedure DA_Clear_Buffer;   
    
    -- as_put writes a string to standard_output
-   procedure AS_Put (Item : in  String)
+   procedure DA_Put (Item : in  String)
      with 
        Global => (In_Out => Standard_Output),
        Depends=> (Standard_Output => (Item, Standard_Output));
@@ -79,7 +79,7 @@ is
    --
    -- (In Ada if a : String    a (x .. y) is the substring starting at position
    -- x and ending at position y.
-   procedure AS_Get_Line (Item : out String; Last : out Natural)
+   procedure DA_Get_Line (Item : out String; Last : out Natural)
      with 
        Global => (In_Out => (Standard_Input)),
        Depends=> (Standard_Input => Standard_Input,
@@ -87,13 +87,13 @@ is
 		
      
    -- as_put_line is as as_put, but adds a line break.
-   procedure AS_Put_Line (Item : in  String)
+   procedure DA_Put_Line (Item : in  String)
      with 
        Global => (In_Out => Standard_Output),
        Depends=> (Standard_Output => (Item, Standard_Output));
    
    -- as_put_line() just adds a linebreak
-   procedure AS_Put_Line 
+   procedure DA_Put_Line 
      with 
        Global => (In_Out => Standard_Output),
        Depends=> (Standard_Output => (Standard_Output));
@@ -109,10 +109,10 @@ is
    -- Prompt_Try_Again_When_Not_Integer has a default value as expressed by 
    --      := "Please type in an integer; please try again"
    -- therefore we use as well
-   -- AS_Get (Item)
-   -- which will execute the same as AS_Get(Item,"Please type in an integer; please try again") 
+   -- DA_Get (Item)
+   -- which will execute the same as DA_Get(Item,"Please type in an integer; please try again") 
    -- 
-   procedure AS_Get (Item  : out Integer; 
+   procedure DA_Get (Item  : out Integer; 
                      Prompt_Try_Again_When_Not_Integer : in String := "Please type in an integer; please try again")            
      with 
        Global => (In_Out => (Standard_Input,Standard_Output)),
@@ -122,20 +122,20 @@ is
    
    
    
-   -- AS_Put(Item) writes an integer value to standard output
-   procedure AS_Put (Item  : in Integer)
+   -- DA_Put(Item) writes an integer value to standard output
+   procedure DA_Put (Item  : in Integer)
      with 
        Global => (In_Out => Standard_Output),
        Depends=> (Standard_Output => (Item, Standard_Output));
    
-   -- AS_Put(Item) does the same as AS_Put(Item) but adds a line break;
-   procedure AS_Put_Line (Item  : in Integer)
+   -- DA_Put(Item) does the same as DA_Put(Item) but adds a line break;
+   procedure DA_Put_Line (Item  : in Integer)
      with 
        Global => (In_Out => Standard_Output),
        Depends=> (Standard_Output => (Item, Standard_Output));   
    
    
-end AS_Io_Wrapper;
+end DA_Io_Wrapper;
    
    
    
