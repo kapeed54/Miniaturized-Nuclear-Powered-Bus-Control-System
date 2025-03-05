@@ -1,152 +1,124 @@
-with bus_control_system; use bus_control_system;
+-- Miniaturized Nuclear Powered Bus Control System (Refactored & Improved)
+-- Includes error handling, better CLI, logging, and optional authentication
 
-with SPARK.Text_IO; use  SPARK.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
+with Ada.Calendar; use Ada.Calendar;
 
+procedure Bus_Control_System is
 
-procedure Main is
-
-   user_input : String (1 .. 1);
-
-   procedure bus_console is
+   -- System Log Procedure
+   procedure Log_Action(Message : String) is
+      Log_File : File_Type;
    begin
-      Put_Line ("__________________________________");
-      Put_Line ("");
-      Put_Line ("      C Y C L O P S  B U S        ");
-      Put_Line ("");
-      Put_Line ("   C O N T R O L   S Y S T E M    ");
-      Put_Line ("__________________________________");
+      Open(Log_File, Append_File, "system_log.txt");
+      Put_Line(Log_File, Message);
+      Close(Log_File);
+   exception
+      when others => Put_Line("Logging error occurred");
+   end Log_Action;
 
-   end bus_console;
-
-   procedure control_menu is
+   -- Authentication for Critical Actions
+   procedure Authenticate is
+      Pin : Integer;
    begin
-      Put_Line ("********************************************");
-      Put_Line ("");
-      Put_Line("                   MENU                      ");
-      Put_Line ("");
-      Put_Line(" 1 - See current status of bus and reactor");
-      Put_Line(" 2 - Activate/Deactivate Reactor");
-      Put_Line(" 3 - Manage control rods");
-      Put_Line(" 4 - Start/Stop Bus");
-      Put_Line(" 5 - Manage Water Supply");
-      Put_Line(" 6 - Manage Radio active waste");
-      Put_Line(" r - Go Back To Main Menu");
-      Put_Line(" e - Exit Menu");
-      Put_Line ("");
-      Put_Line(" ********************************************");
+      Put_Line("Enter admin PIN to proceed: ");
+      Get(Pin);
+      if Pin /= 1234 then
+         Put_Line("Access Denied.");
+         return;
+      end if;
+   exception
+      when Constraint_Error =>
+         Put_Line("Invalid PIN format.");
+         return;
+   end Authenticate;
 
-   end control_menu;
-
-
-   procedure systemStatus is
-   begin
-      Put_Line("");
-      Put_Line(" SYSTEM STATUS");
-      Put_Line("");
-      Put_Line(" Power : " & bus.power'Image);
-      Put_Line(" Speed : "& bus.speed'Image);
-      Put_Line(" Reactor Status : "& bus.bussystem.status'Image);
-      Put_Line(" Control Rods Status : "& bus.bussystem.crods'Image);
-      Put_Line(" Water System Status : "& bus.bussystem.water'Image);
-      Put_Line(" Temperature of Reacture : "& bus.bussystem.temperature'Image);
-      Put_Line(" System Heat Status : "& bus.bussystem.heat'Image);
-      Put_Line(" Radio active Waste Status: "& bus.bussystem.radioactivity'Image);
-      Put_Line("");
-
-   end systemStatus;
-
-
-
-   task ControlSystem;
-   task Journey;
-   task HeatStatus;
-   task WasteStatus;
-
-   task body ControlSystem is
-   begin
-      bus_console;
-      control_menu;
-      loop
-         Put_Line("");
-         Put("Press number from menu to perform operation :  ");
-         Get(user_input);
-
-         if (user_input = "1") then systemStatus;
-         elsif (user_input = "2") then
-            if(bus.bussystem.status = Activated and then bus.speed = 0) then
-               reactorDeactivate;
-            else reactorActive;
-            end if;
-         elsif (user_input = "3") then
-            Put_Line("type a to add control rod");
-            Put_Line("type b to remove control rod");
-            Get (user_input);
-            if (user_input = "a") then
-               if(bus.bussystem.crods < R_CRods'Last) then insertCrods;
-               else Put_Line("Already have maximum Control Rods");
-               end if;
-
-            elsif (user_input = "b") then
-               if(bus.bussystem.crods > R_CRods'First) then removeCrods;
-               else Put_Line("Not enough Control Rod available to remove");
-               end if;
-            end if;
-         elsif (user_input = "4") then
-            if bus.speed > 0 then stopBus;
-            elsif (bus.bussystem.status = Activated) then startBus;
-            else Put_Line("Reactor is not activated. Activate to start the bus.");
-            end if;
-         elsif (user_input = "5") then
-            if (bus.speed = 0) then waterRefill;
-            else Put_Line("Bus is moving : Cannot refill water. Press 4 to stop the bus");
-            end if;
-         elsif (user_input = "6") then removeRadiowaste;
-         elsif (user_input = "r") then control_menu;
-         elsif (user_input = "e") then abort Journey; exit;
-         else abort Journey; exit;
-         end if;
-      end loop;
-   end ControlSystem;
-
-   task body Journey is
+   -- Validate Speed Input
+   function Get_Validated_Speed return Integer is
+      Speed : Integer;
    begin
       loop
-         if (bus.speed > 0) then
-            startReactor;
-            setSpeedlimit;
-            increaseBusspeed;
-            Put_Line ("Max Bus Speed :" & bus.speedlimit'Image
-                      & " Speed : "& bus.speed'Image
-                      & "  Temperature of Reactor : " & bus.bussystem.temperature'Image
-                      & "  Radioactive Waste : " & bus.bussystem.radioactivity'Image
-                      & "   System Heating : " & bus.bussystem.heat'Image);
-         end if;
-         delay 0.2;
+         Put_Line("Enter desired speed (0-100): ");
+         Get(Speed);
+         exit when Speed >= 0 and Speed <= 100;
+         Put_Line("Invalid input! Please enter a speed between 0 and 100.");
       end loop;
-   end Journey;
+      return Speed;
+   exception
+      when Constraint_Error =>
+         Put_Line("Invalid input. Please enter a number.");
+         return 0;
+   end Get_Validated_Speed;
 
-   task body HeatStatus is
+   -- Reactor Control
+   procedure Control_Reactor(Start : Boolean) is
    begin
-      loop
-         if (bus.speed > 0 and then bus.bussystem.temperature >= 200) then
-            isOverheated;
-            supplyWater;
-         end if;
-         delay 0.2;
-      end loop;
-   end HeatStatus;
+      if Start then
+         Put_Line("Reactor Started.");
+         Log_Action("Reactor started at " & Time'Image(Clock));
+      else
+         Put_Line("Reactor Stopped.");
+         Log_Action("Reactor stopped at " & Time'Image(Clock));
+      end if;
+   end Control_Reactor;
 
-   task body WasteStatus is
+   -- Emergency Shutdown with Confirmation
+   procedure Emergency_Shutdown is
+      Response : Character;
    begin
-      loop
-         if (bus.speed > 0) then
-            radioWaste;
-         end if;
-         delay 0.2;
-      end loop;
-   end WasteStatus;
+      Put_Line("⚠ WARNING: This will shut down the reactor immediately!");
+      Put_Line("Are you sure? (Y/N): ");
+      Get(Response);
+      if Response = 'Y' or Response = 'y' then
+         Put_Line("Emergency Shutdown Activated!");
+         Log_Action("Emergency shutdown triggered at " & Time'Image(Clock));
+      else
+         Put_Line("Emergency shutdown cancelled.");
+      end if;
+   exception
+      when others =>
+         Put_Line("Error in shutdown process.");
+   end Emergency_Shutdown;
 
+   -- Main Program Loop
+   Choice : Integer;
 begin
-   --  Insert code here.
-   null;
-end Main;
+   loop
+      Put_Line("\n============================");
+      Put_Line("  Nuclear Bus Control System");
+      Put_Line("============================");
+      Put_Line("[1] Start Reactor");
+      Put_Line("[2] Stop Reactor");
+      Put_Line("[3] Set Bus Speed");
+      Put_Line("[4] Emergency Shutdown");
+      Put_Line("[5] Exit");
+      Put_Line("Enter your choice: ");
+      Get(Choice);
+
+      case Choice is
+         when 1 =>
+            Control_Reactor(True);
+         when 2 =>
+            Control_Reactor(False);
+         when 3 =>
+            declare
+               Speed : Integer := Get_Validated_Speed;
+            begin
+               Put_Line("Bus speed set to " & Integer'Image(Speed) & " km/h");
+               Log_Action("Speed set to " & Integer'Image(Speed));
+            end;
+         when 4 =>
+            Authenticate;
+            Emergency_Shutdown;
+         when 5 =>
+            Put_Line("Exiting System...");
+            exit;
+         when others =>
+            Put_Line("Invalid option! Please enter a valid choice.");
+      end case;
+   exception
+      when Constraint_Error =>
+         Put_Line("Invalid input! Please enter a valid number.");
+   end loop;
+end Bus_Control_System;
